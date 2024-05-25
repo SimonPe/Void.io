@@ -11,6 +11,7 @@ let players = {};
 let objects = [];
 let nickname = '';
 let gameStarted = false;
+let playerId = '';
 
 startButton.addEventListener('click', () => {
   nickname = nicknameInput.value.trim();
@@ -25,6 +26,7 @@ startButton.addEventListener('click', () => {
 socket.on('init', (data) => {
   players = data.players;
   objects = data.objects;
+  playerId = socket.id;
   draw();
   updateScoreboard(); 
 });
@@ -47,7 +49,17 @@ socket.on('death', () => {
 });
 
 function draw() {
+  if (!gameStarted) return;
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  const player = players[playerId];
+  const offsetX = canvas.width / 2 - player.x;
+  const offsetY = canvas.height / 2 - player.y;
+  
+  ctx.save();
+  ctx.translate(offsetX, offsetY);
+
   objects.forEach((object) => {
     ctx.beginPath();
     ctx.arc(object.x, object.y, object.size, 0, Math.PI * 2);
@@ -55,14 +67,17 @@ function draw() {
     ctx.fill();
     ctx.closePath();
   });
-  for (let playerId in players) {
-    const player = players[playerId];
+
+  for (let id in players) {
+    const player = players[id];
     ctx.beginPath();
     ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
     ctx.fillStyle = 'black';
     ctx.fill();
     ctx.closePath();
   }
+
+  ctx.restore();
 }
 
 function updateScoreboard() {
