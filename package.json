@@ -1,0 +1,11 @@
+{
+    "name": "hole-io-multiplayer",
+    "version": "1.0.0",
+    "description": "Simplified multiplayer version of Hole.io using Socket.io",
+    "main": "server.js",
+    "dependencies": {
+      "express": "^4.17.1",
+      "socket.io": "^4.0.1"
+    }
+  }
+  
