@@ -32,6 +32,8 @@ socket.on('init', (data) => {
 });
 
 socket.on('update', (data) => {
+  if (!gameStarted) return;
+
   players = data.players;
   objects = data.objects;
   draw();

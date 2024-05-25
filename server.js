@@ -30,24 +30,23 @@ generateObjects();
 io.on('connection', (socket) => {
   console.log('A user connected');
 
-  players[socket.id] = {
-    x: Math.random() * 800,
-    y: Math.random() * 600,
-    size: 50,
-    score: 0,
-    nickname: 'Player'
-  };
-
-  socket.emit('init', { players, objects });
-
-  socket.broadcast.emit('playerJoin', socket.id);
-
+  // When a player chooses a nickname, initialize their player object
   socket.on('setNickname', (nickname) => {
-    players[socket.id].nickname = nickname;
-    io.emit('update', { players, objects });
+    players[socket.id] = {
+      x: Math.random() * 800,
+      y: Math.random() * 600,
+      size: 50,
+      score: 0,
+      nickname: nickname
+    };
+
+    socket.emit('init', { players, objects });
+    socket.broadcast.emit('playerJoin', socket.id);
   });
 
   socket.on('move', (data) => {
+    if (!players[socket.id]) return; // Ignore movements from players who haven't set a nickname
+
     players[socket.id].x += data.x;
     players[socket.id].y += data.y;
 
