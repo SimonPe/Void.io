@@ -3,13 +3,30 @@ const socket = io();
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const scoreboard = document.getElementById('scoreboard');
+const nicknameForm = document.getElementById('nicknameForm');
+const nicknameInput = document.getElementById('nickname');
+const startButton = document.getElementById('startButton');
 
 let players = {};
 let objects = [];
+let nickname = '';
+let gameStarted = false;
+
+startButton.addEventListener('click', () => {
+  nickname = nicknameInput.value.trim();
+  if (nickname) {
+    socket.emit('setNickname', nickname);
+    nicknameForm.style.display = 'none';
+    canvas.style.display = 'block';
+    gameStarted = true;
+  }
+});
 
 socket.on('init', (data) => {
   players = data.players;
   objects = data.objects;
+  draw();
+  updateScoreboard(); 
 });
 
 socket.on('update', (data) => {
@@ -53,27 +70,29 @@ function updateScoreboard() {
 
   let scoreboardHTML = '<h2>Scoreboard</h2>';
   sortedPlayers.forEach((player, index) => {
-    scoreboardHTML += `<p>${index + 1}. Player ${index + 1}: ${player.score}</p>`;
+    scoreboardHTML += `<p>${index + 1}. ${player.nickname || 'Player'}: ${player.score}</p>`;
   });
 
   scoreboard.innerHTML = scoreboardHTML;
 }
 
 document.addEventListener('keydown', (event) => {
+  if (!gameStarted) return;
+
   let move = { x: 0, y: 0 };
   switch (event.key) {
     case 'ArrowUp':
       move.y = -5;
       break;
     case 'ArrowDown':
-      move.y= 5;
+      move.y = 5;
       break;
-      case 'ArrowLeft':
+    case 'ArrowLeft':
       move.x = -5;
       break;
-      case 'ArrowRight':
+    case 'ArrowRight':
       move.x = 5;
       break;
-      }
-      socket.emit('move', move);
-      });
+  }
+  socket.emit('move', move);
+});

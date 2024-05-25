@@ -2,6 +2,25 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f0f0f0;
+}
+
+.nickname-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.nickname-form label, .nickname-form input, .nickname-form button {
+  margin: 10px 0;
+  font-size: 18px;
 }
 
 canvas {

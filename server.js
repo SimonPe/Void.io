@@ -34,12 +34,18 @@ io.on('connection', (socket) => {
     x: Math.random() * 800,
     y: Math.random() * 600,
     size: 50,
-    score: 0
+    score: 0,
+    nickname: 'Player'
   };
 
   socket.emit('init', { players, objects });
 
   socket.broadcast.emit('playerJoin', socket.id);
+
+  socket.on('setNickname', (nickname) => {
+    players[socket.id].nickname = nickname;
+    io.emit('update', { players, objects });
+  });
 
   socket.on('move', (data) => {
     players[socket.id].x += data.x;

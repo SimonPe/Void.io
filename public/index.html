@@ -7,7 +7,12 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <canvas id="canvas" width="1920" height="1080"></canvas>
+  <div id="nicknameForm" class="nickname-form">
+    <label for="nickname">Enter your nickname:</label>
+    <input type="text" id="nickname" name="nickname">
+    <button id="startButton">Start</button>
+  </div>
+  <canvas id="canvas" width="1920" height="1080" style="display:none;"></canvas>
   <div id="scoreboard" class="scoreboard"></div>
   <script src="/socket.io/socket.io.js"></script>
   <script src="client.js"></script>
