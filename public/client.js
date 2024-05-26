@@ -13,6 +13,9 @@ let nickname = '';
 let gameStarted = false;
 let playerId = '';
 
+let targetX = 0;
+let targetY = 0;
+
 startButton.addEventListener('click', () => {
   nickname = nicknameInput.value.trim();
   if (nickname) {
@@ -28,7 +31,7 @@ socket.on('init', (data) => {
   objects = data.objects;
   playerId = socket.id;
   draw();
-  updateScoreboard(); 
+  updateScoreboard();
 });
 
 socket.on('update', (data) => {
@@ -37,7 +40,7 @@ socket.on('update', (data) => {
   players = data.players;
   objects = data.objects;
   draw();
-  updateScoreboard(); 
+  updateScoreboard();
 });
 
 socket.on('death', () => {
@@ -48,6 +51,16 @@ socket.on('death', () => {
   setTimeout(() => {
     deathScreen.remove();
   }, 3000);
+});
+
+canvas.addEventListener('mousemove', (event) => {
+  const rect = canvas.getBoundingClientRect();
+  targetX = event.clientX - rect.left - canvas.width / 2;
+  targetY = event.clientY - rect.top - canvas.height / 2;
+});
+
+socket.on('updateBlueBalls', (blueBalls) => {
+  objects = objects.filter(obj => obj.type !== 'blueBall').concat(blueBalls);
 });
 
 function draw() {
@@ -65,7 +78,7 @@ function draw() {
   objects.forEach((object) => {
     ctx.beginPath();
     ctx.arc(object.x, object.y, object.size, 0, Math.PI * 2);
-    ctx.fillStyle = object.type === 'blueBall' ? 'blue' : 'green'; 
+    ctx.fillStyle = object.type === 'blueBall' ? 'blue' : 'green';
     ctx.fill();
     ctx.closePath();
   });
@@ -93,23 +106,60 @@ function updateScoreboard() {
   scoreboard.innerHTML = scoreboardHTML;
 }
 
-document.addEventListener('keydown', (event) => {
+function updatePosition() {
   if (!gameStarted) return;
 
-  let move = { x: 0, y: 0 };
-  switch (event.key) {
-    case 'ArrowUp':
-      move.y = -5;
-      break;
-    case 'ArrowDown':
-      move.y = 5;
-      break;
-    case 'ArrowLeft':
-      move.x = -5;
-      break;
-    case 'ArrowRight':
-      move.x = 5;
-      break;
+  const player = players[playerId];
+  const baseSpeed = 2; 
+  const speedMultiplier = 0.05; 
+  const speed = baseSpeed + (player.size * speedMultiplier);
+
+  const dx = targetX;
+  const dy = targetY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  if (distance > speed) {
+    player.x += (dx / distance) * speed;
+    player.y += (dy / distance) * speed;
+  } else {
+    player.x += dx;
+    player.y += dy;
   }
-  socket.emit('move', move);
-});
+
+  socket.emit('move', { x: player.x, y: player.y });
+  draw();
+}
+
+function draw() {
+  if (!gameStarted) return;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  const player = players[playerId];
+  const offsetX = canvas.width / 2 - player.x;
+  const offsetY = canvas.height / 2 - player.y;
+  
+  ctx.save();
+  ctx.translate(offsetX, offsetY);
+
+  objects.forEach((object) => {
+    ctx.beginPath();
+    ctx.arc(object.x, object.y, object.size, 0, Math.PI * 2);
+    ctx.fillStyle = object.type === 'blueBall' ? 'blue' : 'green';
+    ctx.fill();
+    ctx.closePath();
+  });
+
+  for (let id in players) {
+    const player = players[id];
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+    ctx.fillStyle = 'black';
+    ctx.fill();
+    ctx.closePath();
+  }
+
+  ctx.restore();
+}
+
+setInterval(updatePosition, 20);
