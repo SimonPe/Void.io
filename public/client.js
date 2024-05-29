@@ -16,11 +16,11 @@ let playerId = '';
 let targetX = 0;
 let targetY = 0;
 
-const MAP_WIDTH = 2000;  
-const MAP_HEIGHT = 2000; 
-const BORDER_THICKNESS = 10;  
-const MINIMAP_SCALE = 0.1;  
-const MINIMAP_PADDING = 20; 
+const MAP_WIDTH = 3000;
+const MAP_HEIGHT = 3000;
+const BORDER_THICKNESS = 10;
+const MINIMAP_SCALE = 0.1;
+const MINIMAP_PADDING = 20;
 
 startButton.addEventListener('click', () => {
   nickname = nicknameInput.value.trim();
@@ -127,11 +127,13 @@ function drawMinimap() {
 
   objects.forEach((object) => {
     if (object.type === 'blueBall') {
-      ctx.beginPath();
-      ctx.arc(object.x, object.y, object.size * 0.5, 0, Math.PI * 2); 
-      ctx.fillStyle = 'blue';
-      ctx.fill();
-      ctx.closePath();
+      if (isInBounds(object)) {
+        ctx.beginPath();
+        ctx.arc(object.x, object.y, object.size * 0.5, 0, Math.PI * 2);
+        ctx.fillStyle = 'blue';
+        ctx.fill();
+        ctx.closePath();
+      }
     }
   });
 
@@ -139,7 +141,7 @@ function drawMinimap() {
     const player = players[id];
     ctx.beginPath();
     ctx.arc(player.x, player.y, player.size * 0.5, 0, Math.PI * 2);
-    ctx.fillStyle = id === playerId ? 'black' : 'red'; 
+    ctx.fillStyle = id === playerId ? 'black' : 'red';
     ctx.fill();
     ctx.closePath();
   }
