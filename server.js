@@ -6,18 +6,21 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 25567;
 
 app.use(express.static('public'));
 
 let players = {};
 let objects = [];
 
+const MAP_WIDTH = 3000;  // Taille de la carte
+const MAP_HEIGHT = 3000; // Taille de la carte
+
 function generateObjects() {
   for (let i = 0; i < 10; i++) {
     let object = {
-      x: Math.random() * 800,
-      y: Math.random() * 600,
+      x: Math.random() * (MAP_WIDTH - 20) + 10,
+      y: Math.random() * (MAP_HEIGHT - 20) + 10,
       size: Math.random() * 20 + 10,
       type: 'blueBall'
     };
@@ -26,10 +29,10 @@ function generateObjects() {
 }
 
 function generateBlueBalls() {
-  for (let i = 0; i < 5; i++) { 
+  for (let i = 0; i < 5; i++) {
     let blueBall = {
-      x: Math.random() * 800,
-      y: Math.random() * 600,
+      x: Math.random() * (MAP_WIDTH - 20) + 10,
+      y: Math.random() * (MAP_HEIGHT - 20) + 10,
       size: Math.random() * 20 + 10,
       type: 'blueBall'
     };
@@ -44,8 +47,8 @@ io.on('connection', (socket) => {
 
   socket.on('setNickname', (nickname) => {
     players[socket.id] = {
-      x: Math.random() * 800,
-      y: Math.random() * 600,
+      x: Math.random() * (MAP_WIDTH - 100) + 50,
+      y: Math.random() * (MAP_HEIGHT - 100) + 50,
       size: 50,
       score: 0,
       nickname: nickname
@@ -83,8 +86,8 @@ io.on('connection', (socket) => {
         const distance = Math.sqrt(dx * dx + dy * dy);
         if (players[socket.id].size > otherPlayer.size && distance < players[socket.id].size - otherPlayer.size) {
           players[socket.id].size += Math.min(otherPlayer.size, 1);
-          otherPlayer.x = Math.random() * 800;
-          otherPlayer.y = Math.random() * 600;
+          otherPlayer.x = Math.random() * (MAP_WIDTH - 100) + 50;
+          otherPlayer.y = Math.random() * (MAP_HEIGHT - 100) + 50;
           otherPlayer.size = 50;
           io.to(playerId).emit('death');
         }
@@ -104,7 +107,7 @@ io.on('connection', (socket) => {
 setInterval(() => {
   generateBlueBalls();
   io.emit('updateBlueBalls', objects.filter(obj => obj.type === 'blueBall'));
-}, 10000); 
+}, 3500);
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
