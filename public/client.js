@@ -12,6 +12,7 @@ let objects = [];
 let nickname = '';
 let gameStarted = false;
 let playerId = '';
+let lastScoreboardUpdate = 0;
 
 let targetX = 0;
 let targetY = 0;
@@ -150,6 +151,11 @@ function drawMinimap() {
 }
 
 function updateScoreboard() {
+  const now = Date.now();
+  if (now - lastScoreboardUpdate < 2000) return;
+
+  lastScoreboardUpdate = now;
+  
   const sortedPlayers = Object.values(players).sort((a, b) => b.score - a.score);
 
   let scoreboardHTML = '<h2>Scoreboard</h2>';
